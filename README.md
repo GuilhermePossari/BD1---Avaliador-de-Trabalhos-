@@ -33,7 +33,7 @@ Este sistema tem como objetivo principal auxiliar professores no processo de ava
 
 1. Clone este repositório:
     ```
-    git clone https://github.com/seu-usuario/nome-do-repo.git
+    git clone https://github.com/GuilhermePossari/BD1---Avaliador-de-Trabalhos-/.git
     ```
 2. Importe o script SQL de criação do banco disponível na pasta `sql/` para um banco PostgreSQL.
 3. Insira dados de teste com os scripts fornecidos ou pela interface.
@@ -56,4 +56,5 @@ O sistema disponibiliza relatórios variados, incluindo:
 Este projeto é acadêmico e não possui licença de uso comercial.
 
 ---
+
 
