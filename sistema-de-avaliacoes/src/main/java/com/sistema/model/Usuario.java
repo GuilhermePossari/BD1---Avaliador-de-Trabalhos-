@@ -6,19 +6,17 @@ public class Usuario {
     private String snome;
     private String email;
     private String senha;
-    private String tipo; // "estudante" ou "professor"
 
     public Usuario(){
 
     }
     
-    public Usuario(int id, String pnome, String snome, String email, String senha, String tipo) {
+    public Usuario(int id, String pnome, String snome, String email, String senha) {
         this.id = id;
         this.pnome = pnome;
         this.snome = snome;
         this.email = email;
         this.senha = senha;
-        this.tipo = tipo;
     }
 
     public int getId() {
@@ -60,14 +58,5 @@ public class Usuario {
     public void setSenha(String senha) {
         this.senha = senha;
     }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
     
 }
