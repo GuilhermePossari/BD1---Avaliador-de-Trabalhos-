@@ -10,4 +10,5 @@ public interface UsuarioDAO {
     void update(Usuario usuario) throws SQLException;
     void delete(int id) throws SQLException;
     List<Usuario> all() throws SQLException;
+    Usuario buscarPorEmail(String email) throws SQLException;
 }

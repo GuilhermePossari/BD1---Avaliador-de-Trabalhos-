@@ -26,8 +26,6 @@ public class PgProfessorDAO implements ProfessorDAO {
 
     @Override
     public void create(Professor professor) {
-        // Primeiro, insere na tabela Usuario, pois Professor é uma especialização
-        new PgUsuarioDAO(null).create(professor);
 
         String sql = "INSERT INTO Professor (id_usuario, cria_aval_cod) VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {

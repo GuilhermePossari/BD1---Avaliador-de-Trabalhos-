@@ -59,8 +59,6 @@ public class PgUsuarioDAO implements UsuarioDAO {
             statement.setString(3, usuario.getSnome());
             statement.setString(4, usuario.getEmail());
 
-            // ATENÇÃO: Armazenar senhas em texto plano é uma falha grave de segurança.
-            // O ideal é armazenar um hash da senha (ex: usando BCrypt).
             statement.setString(5, usuario.getSenha());
 
             statement.executeUpdate();
@@ -165,5 +163,33 @@ public class PgUsuarioDAO implements UsuarioDAO {
             throw new RuntimeException("Erro ao listar todos os usuários.", e);
         }
         return usuarios;
+    }
+
+    /**
+     * Busca um usuário pelo seu email.
+     *
+     * @param email O email do usuário a ser buscado.
+     * @return Um objeto Usuario se encontrado, ou null caso contrário.
+     */
+    @Override
+    public Usuario buscarPorEmail(String email) {
+        String sql = "SELECT * FROM Usuario WHERE email = ?";
+        Usuario usuario = null;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    usuario = new Usuario();
+                    usuario.setId(resultSet.getInt("id_usuario"));
+                    usuario.setPnome(resultSet.getString("pnome"));
+                    usuario.setSnome(resultSet.getString("snome"));
+                    usuario.setEmail(resultSet.getString("email"));
+                    usuario.setSenha(resultSet.getString("senha"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar usuário por email.", e);
+        }
+        return usuario;
     }
 }

@@ -124,13 +124,12 @@ public class PgTrabalhoDAO implements TrabalhoDAO {
         return trabalhos;
     }
 
-    // Método auxiliar para não repetir código de mapeamento
+    // Método auxiliar para não repetir código
     private Trabalho mapRowToTrabalho(ResultSet rs) throws SQLException {
         Trabalho trabalho = new Trabalho();
         trabalho.setPertAvalCod(rs.getInt("pert_aval_cod"));
         trabalho.setIdUsuario(rs.getInt("id_usuario"));
         trabalho.setIdDisciplina(rs.getInt("id_disciplina"));
-        // Conversão CORRETA de sql.Date para LocalDate
         trabalho.setDataEnvio(rs.getDate("data_envio").toLocalDate());
         trabalho.setArquivoUrl(rs.getString("arquivo_url"));
         trabalho.setStatus(rs.getString("status"));

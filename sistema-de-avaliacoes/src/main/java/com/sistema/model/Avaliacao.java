@@ -10,7 +10,7 @@ public class Avaliacao {
     private Date dataPublicacao;
     private Date prazo;
 
-    // --- GETTERS E SETTERS ---
+
 
     public int getIdDisciplina() {
         return idDisciplina;
@@ -28,12 +28,10 @@ public class Avaliacao {
         this.codAvaliacao = codAvaliacao;
     }
 
-    // Método GET que estava faltando
     public int getCriaAvalCod() {
         return criaAvalCod;
     }
 
-    // Método SET que estava faltando
     public void setCriaAvalCod(int criaAvalCod) {
         this.criaAvalCod = criaAvalCod;
     }
