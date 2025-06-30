@@ -1,8 +1,7 @@
 package com.sistema.controller;
 
-import com.sistema.dao.interfaces.UsuarioDAO;
-import com.sistema.dao.PgDAOFactory;
 import com.sistema.model.Usuario;
+import com.sistema.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +10,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    private final UsuarioDAO usuarioDAO;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public UsuarioController(PgDAOFactory daoFactory) {
-        this.usuarioDAO = daoFactory.getUsuarioDAO();
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
-    @PostMapping
-    public ResponseEntity<Usuario> criar(@RequestBody Usuario usuario) {
-        usuarioDAO.inserir(usuario);
+    @GetMapping("/email")
+    public ResponseEntity<Usuario> buscarPorEmail(@RequestParam String email) {
+        Usuario usuario = usuarioService.buscarPorEmail(email);
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(usuario);
     }
+
+    @GetMapping("/existe")
+    public ResponseEntity<Boolean> emailJaExiste(@RequestParam String email) {
+        boolean existe = usuarioService.emailJaExiste(email);
+        return ResponseEntity.ok(existe);
+    }
 }
+    
