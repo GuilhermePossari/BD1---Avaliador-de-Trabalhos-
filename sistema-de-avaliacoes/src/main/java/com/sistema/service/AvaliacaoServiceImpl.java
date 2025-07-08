@@ -1,8 +1,11 @@
 package com.sistema.service;
 
 import com.sistema.dao.interfaces.AvaliacaoDAO;
+import com.sistema.dao.interfaces.CriterioDAO;
+import com.sistema.dto.AvaliacaoComCriteriosDTO;
+import com.sistema.dto.CriterioDTO;
 import com.sistema.model.Avaliacao;
-
+import com.sistema.model.Criterio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,20 +16,17 @@ import java.util.List;
 public class AvaliacaoServiceImpl implements AvaliacaoService {
 
     private final AvaliacaoDAO avaliacaoDAO;
+    private final CriterioDAO criterioDAO;
 
     @Autowired
-    public AvaliacaoServiceImpl(AvaliacaoDAO avaliacaoDAO) {
+    public AvaliacaoServiceImpl(AvaliacaoDAO avaliacaoDAO, CriterioDAO criterioDAO) {
         this.avaliacaoDAO = avaliacaoDAO;
+        this.criterioDAO = criterioDAO;
     }
 
     @Override
     @Transactional
     public Avaliacao criar(Avaliacao avaliacao) {
-        // Aqui poderíamos adicionar validações?:
-        // 1. Verificar se a data de prazo é posterior à data de publicação.
-        // 2. Verificar se a disciplina (avaliacao.getIdDisciplina()) existe.
-        // 3. Verificar se o professor (avaliacao.getCriaAvalCod()) existe.
-
         if (avaliacao.getPrazo().before(avaliacao.getDataPublicacao())) {
             throw new RuntimeException("A data de prazo não pode ser anterior à data de publicação.");
         }
@@ -38,6 +38,49 @@ public class AvaliacaoServiceImpl implements AvaliacaoService {
         }
         return avaliacao;
     }
+
+    @Override
+@Transactional
+public Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto) {
+    if (dto.getPrazo().before(dto.getDataPublicacao())) {
+        throw new RuntimeException("A data de prazo não pode ser anterior à data de publicação.");
+    }
+
+    Avaliacao avaliacao = new Avaliacao();
+    avaliacao.setIdDisciplina(dto.getIdDisciplina());
+    avaliacao.setCodAvaliacao(dto.getCodAvaliacao());
+    avaliacao.setCriaAvalCod(dto.getCriaAvalCod());
+    avaliacao.setDataPublicacao(dto.getDataPublicacao());
+    avaliacao.setPrazo(dto.getPrazo());
+
+    try {
+        avaliacaoDAO.create(avaliacao);
+
+        List<CriterioDTO> criteriosDto = dto.getCriterios();
+
+        if (criteriosDto != null) {
+            int idCriterio = 0; // Começa do zero e incrementa para cada critério
+            for (CriterioDTO cDto : criteriosDto) {
+                Criterio c = new Criterio();
+                c.setIdDisciplina(dto.getIdDisciplina());
+                c.setCodAvaliacao(dto.getCodAvaliacao());
+                c.setIdProfessor(dto.getCriaAvalCod()); // O professor criador
+                c.setIdCriterio(idCriterio++); // Cada critério recebe um id único dentro da avaliação
+                c.setNome(cDto.getNome());
+                c.setDescricao(cDto.getDescricao());
+                c.setPeso(java.math.BigDecimal.valueOf(cDto.getPeso()));
+
+                criterioDAO.create(c);
+            }
+        }
+
+    } catch (java.sql.SQLException e) {
+        throw new RuntimeException("Erro ao criar avaliação com critérios: " + e.getMessage(), e);
+    }
+
+    return avaliacao;
+}
+
 
     @Override
     public Avaliacao buscarPorId(int idDisciplina, int codAvaliacao) {

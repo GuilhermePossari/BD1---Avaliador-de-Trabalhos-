@@ -9,4 +9,5 @@ public interface TrabalhoService {
     Trabalho buscarPorId(int pertAvalCod, int idUsuario);
     List<Trabalho> listarPorDisciplina(int idDisciplina);
     List<Trabalho> listarPorEstudante(int idUsuario);
+    List<Trabalho> listarPorAvaliacao(int idDisciplina, int codAvaliacao);  
 }

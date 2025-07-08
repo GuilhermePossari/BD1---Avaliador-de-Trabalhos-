@@ -16,4 +16,6 @@ public interface UsuarioService {
      * @return O usuário encontrado ou null.
      */
     Usuario buscarPorEmail(String email);
+    String obterPapelDoUsuario(int usuarioId);
+
 }

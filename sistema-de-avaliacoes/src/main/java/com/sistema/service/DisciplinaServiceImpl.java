@@ -2,6 +2,8 @@ package com.sistema.service;
 
 import com.sistema.dao.interfaces.DisciplinaDAO;
 import com.sistema.model.Disciplina;
+import com.sistema.model.Estudante;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,5 +48,10 @@ public class DisciplinaServiceImpl implements DisciplinaService {
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Erro ao listar todas as disciplinas", e);
         }
+    }
+    
+     @Override
+    public List<Estudante> listarAlunosMatriculados(int idDisciplina) {
+        return disciplinaDAO.listarAlunosMatriculados(idDisciplina);
     }
 }

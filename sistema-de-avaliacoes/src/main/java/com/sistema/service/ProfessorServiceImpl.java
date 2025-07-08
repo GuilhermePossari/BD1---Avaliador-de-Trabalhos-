@@ -62,7 +62,6 @@ public class ProfessorServiceImpl implements ProfessorService {
     public void deletar(int id) {
         try {
             professorDAO.delete(id);
-            // O delete no DAO já deve remover da tabela Usuario também (CASCADE)
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Erro ao deletar professor: " + e.getMessage(), e);
         }

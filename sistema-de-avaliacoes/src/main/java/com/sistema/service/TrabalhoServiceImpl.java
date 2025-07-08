@@ -54,6 +54,14 @@ public class TrabalhoServiceImpl implements TrabalhoService {
         }
         return trabalho;
     }
+    @Override
+    public List<Trabalho> listarPorAvaliacao(int idDisciplina, int codAvaliacao) {
+        try {
+            return trabalhoDAO.listarPorAvaliacao(idDisciplina, codAvaliacao);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar trabalhos da avaliação", e);
+        }
+    }
 
     @Override
     @Transactional
@@ -70,7 +78,6 @@ public class TrabalhoServiceImpl implements TrabalhoService {
 
         // Validação simples do status
         if (!Objects.equals(novoStatus, "Avaliado")) {
-           // Poderia adicionar outros status como "Pendente de Revisão", etc.
             throw new IllegalArgumentException("Status de avaliação inválido.");
         }
 
