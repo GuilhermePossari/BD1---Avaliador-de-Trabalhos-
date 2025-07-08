@@ -46,6 +46,31 @@ public class PgTrabalhoDAO implements TrabalhoDAO {
         }
     }
 
+     @Override
+    public List<Trabalho> listarPorAvaliacao(int idDisciplina, int codAvaliacao) {
+        String sql = "SELECT * FROM Trabalho WHERE id_disciplina = ? AND pert_aval_cod = ?";
+        List<Trabalho> trabalhos = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idDisciplina);
+            statement.setInt(2, codAvaliacao);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Trabalho t = new Trabalho();
+                    t.setPertAvalCod(rs.getInt("pert_aval_cod"));
+                    t.setIdUsuario(rs.getInt("id_usuario"));
+                    t.setIdDisciplina(rs.getInt("id_disciplina"));
+                    t.setDataEnvio(rs.getDate("data_envio").toLocalDate());
+                    t.setArquivoUrl(rs.getString("arquivo_url"));
+                    t.setStatus(rs.getString("status"));
+                    trabalhos.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar trabalhos por avaliação.", e);
+        }
+        return trabalhos;
+    }
+
     @Override
     public Trabalho read(int pertAvalCod, int idUsuario) {
         String sql = "SELECT * FROM Trabalho WHERE pert_aval_cod = ? AND id_usuario = ?";

@@ -11,4 +11,5 @@ public interface TrabalhoDAO {
     void delete(int idUsuario, int codAvaliacao) throws SQLException;
     List<Trabalho> allByDisciplina(int idDisciplina) throws SQLException;
     List<Trabalho> all() throws SQLException;
+    List<Trabalho> listarPorAvaliacao(int idDisciplina, int codAvaliacao);
 }

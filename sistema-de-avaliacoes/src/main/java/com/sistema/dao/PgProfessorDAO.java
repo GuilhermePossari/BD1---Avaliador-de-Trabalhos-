@@ -1,8 +1,8 @@
 package com.sistema.dao;
 
 import com.sistema.dao.interfaces.ProfessorDAO;
+import com.sistema.dao.interfaces.UsuarioDAO;
 import com.sistema.model.Professor;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -14,11 +14,12 @@ import java.util.List;
 public class PgProfessorDAO implements ProfessorDAO {
 
     private final Connection connection;
+    private final UsuarioDAO usuarioDAO;
 
-    // @Autowired
-    public PgProfessorDAO(DataSource dataSource) {
+    public PgProfessorDAO(DataSource dataSource, UsuarioDAO usuarioDAO) {
         try {
             this.connection = dataSource.getConnection();
+            this.usuarioDAO = usuarioDAO;
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao conectar ao banco de dados", e);
         }
@@ -26,6 +27,17 @@ public class PgProfessorDAO implements ProfessorDAO {
 
     @Override
     public void create(Professor professor) {
+        try {
+            usuarioDAO.create(professor);
+        } catch (SQLException e) {
+            // 23505 = unique_violation no PostgreSQL
+            if (e.getSQLState() != null && e.getSQLState().equals("23505")) {
+                // Usuário já existe, não interrompe
+                System.out.println("Usuário já existe, continuando cadastro do professor...");
+            } else {
+                throw new RuntimeException("Erro ao inserir usuário do professor.", e);
+            }
+        }
 
         String sql = "INSERT INTO Professor (id_usuario, cria_aval_cod) VALUES (?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -39,8 +51,7 @@ public class PgProfessorDAO implements ProfessorDAO {
 
     @Override
     public Professor read(int id) {
-        String sql = "SELECT u.*, p.cria_aval_cod FROM Usuario u " +
-                    "JOIN Professor p ON u.id_usuario = p.id_usuario WHERE u.id_usuario = ?";
+        String sql = "SELECT u.*, p.cria_aval_cod FROM Usuario u JOIN Professor p ON u.id_usuario = p.id_usuario WHERE u.id_usuario = ?";
         Professor professor = null;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -65,8 +76,11 @@ public class PgProfessorDAO implements ProfessorDAO {
 
     @Override
     public void update(Professor professor) {
-        // Atualiza a parte do Usuario
-        new PgUsuarioDAO(null).update(professor);
+        try {
+            usuarioDAO.update(professor);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar usuário do professor.", e);
+        }
 
         String sql = "UPDATE Professor SET cria_aval_cod = ? WHERE id_usuario = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -84,9 +98,8 @@ public class PgProfessorDAO implements ProfessorDAO {
         String sqlUser = "DELETE FROM Usuario WHERE id_usuario = ?";
 
         try (PreparedStatement stmtProf = connection.prepareStatement(sqlProf);
-            PreparedStatement stmtUser = connection.prepareStatement(sqlUser)) {
+             PreparedStatement stmtUser = connection.prepareStatement(sqlUser)) {
 
-            // A ordem importa devido às chaves estrangeiras
             stmtProf.setInt(1, id);
             stmtProf.executeUpdate();
 
@@ -104,7 +117,7 @@ public class PgProfessorDAO implements ProfessorDAO {
         List<Professor> professores = new ArrayList<>();
 
         try (Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(sql)) {
+             ResultSet rs = statement.executeQuery(sql)) {
 
             while (rs.next()) {
                 Professor professor = new Professor();

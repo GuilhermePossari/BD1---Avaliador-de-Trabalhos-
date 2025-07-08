@@ -10,4 +10,5 @@ public interface EstudanteDAO {
     void update(Estudante estudante) throws SQLException;
     void delete(int id) throws SQLException;
     List<Estudante> all() throws SQLException;
+    void matricular(int idUsuario, int idDisciplina);
 }

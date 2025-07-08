@@ -1,8 +1,8 @@
 package com.sistema.dao;
 
 import com.sistema.dao.interfaces.EstudanteDAO;
+import com.sistema.dao.interfaces.UsuarioDAO;
 import com.sistema.model.Estudante;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -14,11 +14,12 @@ import java.util.List;
 public class PgEstudanteDAO implements EstudanteDAO {
 
     private final Connection connection;
+    private final UsuarioDAO usuarioDAO;
 
-    // @Autowired
-    public PgEstudanteDAO(DataSource dataSource) {
+    public PgEstudanteDAO(DataSource dataSource, UsuarioDAO usuarioDAO) {
         try {
             this.connection = dataSource.getConnection();
+            this.usuarioDAO = usuarioDAO;
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao conectar ao banco de dados", e);
         }
@@ -26,8 +27,12 @@ public class PgEstudanteDAO implements EstudanteDAO {
 
     @Override
     public void create(Estudante estudante) {
-        // Primeiro, insere na tabela Usuario
-        new PgUsuarioDAO(null).create(estudante);
+        // Agora usa o UsuarioDAO injetado corretamente!
+        try {
+            usuarioDAO.create(estudante);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao inserir usuário do estudante.", e);
+        }
 
         String sql = "INSERT INTO Estudante (id_usuario) VALUES (?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -62,8 +67,11 @@ public class PgEstudanteDAO implements EstudanteDAO {
 
     @Override
     public void update(Estudante estudante) {
-        // Estudante não tem campos próprios, apenas atualiza a parte do Usuario
-        new PgUsuarioDAO(null).update(estudante);
+        try {
+            usuarioDAO.update(estudante);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar usuário do estudante.", e);
+        }
     }
 
     @Override
@@ -101,4 +109,16 @@ public class PgEstudanteDAO implements EstudanteDAO {
         }
         return estudantes;
     }
+    @Override
+    public void matricular(int idUsuario, int idDisciplina) {
+        String sql = "INSERT INTO Est_part_discp (id_usuario, id_disciplina) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            stmt.setInt(2, idDisciplina);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao matricular estudante: " + e.getMessage(), e);
+        }
+    }
+
 }

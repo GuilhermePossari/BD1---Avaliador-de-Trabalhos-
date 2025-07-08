@@ -2,6 +2,8 @@ package com.sistema.dao;
 
 import com.sistema.dao.interfaces.DisciplinaDAO;
 import com.sistema.model.Disciplina;
+import com.sistema.model.Estudante;
+
 // import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +25,32 @@ public class PgDisciplinaDAO implements DisciplinaDAO {
             throw new RuntimeException("Erro ao conectar ao banco de dados", e);
         }
     }
+    @Override
+    public List<Estudante> listarAlunosMatriculados(int idDisciplina) {
+    String sql = "SELECT u.id_usuario, u.pnome, u.snome, u.email, u.senha " +
+                 "FROM Est_part_discp epd " +
+                 "JOIN Usuario u ON epd.id_usuario = u.id_usuario " +
+                 "WHERE epd.id_disciplina = ?";
+    List<Estudante> alunos = new ArrayList<>();
+    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        statement.setInt(1, idDisciplina);
+        try (ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                Estudante e = new Estudante();
+                e.setId(rs.getInt("id_usuario"));
+                e.setPnome(rs.getString("pnome"));
+                e.setSnome(rs.getString("snome"));
+                e.setEmail(rs.getString("email"));
+                e.setSenha(rs.getString("senha"));
+                alunos.add(e);
+            }
+        }
+    } catch (SQLException ex) {
+        throw new RuntimeException("Erro ao listar alunos da disciplina.", ex);
+    }
+    return alunos;
+    }
+
 
     @Override
     public void create(Disciplina disciplina) {

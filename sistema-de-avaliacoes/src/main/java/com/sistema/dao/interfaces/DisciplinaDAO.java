@@ -1,6 +1,8 @@
 package com.sistema.dao.interfaces;
 
 import com.sistema.model.Disciplina;
+import com.sistema.model.Estudante;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -10,4 +12,6 @@ public interface DisciplinaDAO {
     void update(Disciplina disciplina) throws SQLException;
     void delete(int id) throws SQLException;
     List<Disciplina> all() throws SQLException;
+    List<Estudante> listarAlunosMatriculados(int idDisciplina);
+
 }

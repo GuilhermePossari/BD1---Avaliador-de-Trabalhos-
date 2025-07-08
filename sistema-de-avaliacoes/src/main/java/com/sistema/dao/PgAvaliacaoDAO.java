@@ -2,7 +2,6 @@ package com.sistema.dao;
 
 import com.sistema.dao.interfaces.AvaliacaoDAO;
 import com.sistema.model.Avaliacao;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -15,7 +14,6 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
 
     private final Connection connection;
 
-    // @Autowired
     public PgAvaliacaoDAO(DataSource dataSource) {
         try {
             this.connection = dataSource.getConnection();
@@ -114,7 +112,7 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
 
     @Override
     public List<Avaliacao> allByDisciplina(int idDisciplina) {
-        String sql = "SELECT * FROM Avaliaco WHERE id_disciplina = ?";
+        String sql = "SELECT * FROM Avaliacao WHERE id_disciplina = ?";
         List<Avaliacao> avaliacoes = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {

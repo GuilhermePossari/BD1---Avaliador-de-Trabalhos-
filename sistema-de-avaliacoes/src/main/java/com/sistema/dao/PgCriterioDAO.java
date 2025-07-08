@@ -2,7 +2,6 @@ package com.sistema.dao;
 
 import com.sistema.dao.interfaces.CriterioDAO;
 import com.sistema.model.Criterio;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -15,7 +14,6 @@ public class PgCriterioDAO implements CriterioDAO {
 
     private final Connection connection;
 
-    // @Autowired
     public PgCriterioDAO(DataSource dataSource) {
         try {
             this.connection = dataSource.getConnection();
