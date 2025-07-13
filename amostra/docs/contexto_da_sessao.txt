@@ -1,0 +1,47 @@
+Resumo do Contexto da Sessão:
+
+1. Contexto Inicial do Sistema:
+O sistema é um "Sistema de Auxílio de Avaliação de Trabalhos para Professores".
+*   **Objetivo:** Permitir que estudantes enviem trabalhos e que professores os avaliem com critérios personalizados, gerando relatórios individuais e gerais.
+*   **Atores:** Estudante e Professor.
+*   **Tecnologias:** Backend em Java/Spring Boot (sem JPA, usando JDBC direto) e Frontend em React. Banco de dados PostgreSQL.
+
+2. Problema 1: Falha ao Gerar Relatório Geral do Professor (Erro 400 Bad Request)
+*   **Sintoma:** Frontend recebia 400 Bad Request ao tentar gerar o relatório geral.
+*   **Diagnóstico Inicial:** Suspeita de `idDisciplina` sendo enviado como string para o backend que esperava um inteiro.
+*   **Solução 1.1 (Frontend):** Convertido `selectedDisciplina` para `int` no `RelatorioGeralPage.js` antes de enviar a requisição.
+*   **Diagnóstico 1.2 (Backend):** Mesmo após a correção do frontend, o erro 400 persistia. Foi modificado `RelatorioController.java` para retornar a mensagem de erro da exceção. A mensagem revelou "incompatible types" devido ao `ResponseEntity<RelatorioGeralDTO>` tentando retornar uma `String`.
+*   **Solução 1.2 (Backend):** Alterado o tipo de retorno do método `gerarRelatorioGeral` no `RelatorioController.java` para `ResponseEntity<?>`.
+*   **Diagnóstico 1.3 (Backend):** A nova mensagem de erro foi "Erro ao listar trabalhos por disciplina". A investigação no `TrabalhoServiceImpl.java` e `PgTrabalhoDAO.java` revelou que `notasPorCriterio` não estava sendo populado em `Trabalho`s retornados por `allByDisciplina`, causando `NullPointerException`.
+*   **Solução 1.3 (Backend):** Adicionado código em `PgTrabalhoDAO.java` (`allByDisciplina`) para popular `notasPorCriterio` para cada `Trabalho`.
+*   **Diagnóstico 1.4 (Backend):** O erro "Erro ao listar trabalhos por disciplina" persistiu. O stack trace do backend revelou `org.postgresql.util.PSQLException: ERRO: coluna t.id_avaliacao não existe`.
+*   **Solução 1.4 (Backend):** Corrigida a consulta SQL no `PgTrabalhoDAO.java` (`allByDisciplina`) para usar `t.pert_aval_cod` em vez de `t.id_avaliacao` na cláusula `JOIN`.
+
+3. Problema 2: Falha ao Buscar Detalhes da Avaliação para Envio de Trabalho (Erro 404 Not Found)
+*   **Sintoma:** Estudante recebia 404 Not Found ao tentar acessar a página de envio de trabalho, buscando detalhes da avaliação.
+*   **Diagnóstico:** O frontend estava tentando acessar `/api/avaliacoes/{idDisciplina}/{codAvaliacao}`, mas o `AvaliacaoController` não possuía um endpoint que correspondesse a essa URL.
+*   **Solução:**
+    *   Adicionado novo endpoint `@GetMapping("/{idDisciplina}/{codAvaliacao}")` ao `AvaliacaoController.java`.
+    *   Adicionado método `buscarPorDisciplinaECodigo` à interface `AvaliacaoService.java` e sua implementação `AvaliacaoServiceImpl.java`.
+    *   Adicionado método `readByDisciplinaAndCodigo` à interface `AvaliacaoDAO.java` e sua implementação `PgAvaliacaoDAO.java`.
+
+4. Problema 3: Falha ao Enviar Trabalho (Erro 400 Bad Request - Parâmetro Ausente)
+*   **Sintoma:** Estudante recebia 400 Bad Request ao tentar enviar o trabalho, com a mensagem "Required request parameter 'idAvaliacao' for method parameter type int is not present".
+*   **Diagnóstico:** O frontend estava enviando o parâmetro como `pertAvalCod`, mas o backend esperava `idAvaliacao`.
+*   **Solução:** Corrigido o nome do parâmetro no `EnviarTrabalhoPage.js` de `pertAvalCod` para `idAvaliacao`.
+
+5. Problema 4: Falha ao Enviar Trabalho (Erro 400 Bad Request - Violação NOT NULL)
+*   **Sintoma:** Estudante recebia 400 Bad Request ao tentar enviar o trabalho, com a mensagem "Erro ao inserir trabalho". O stack trace do backend revelou "o valor nulo na coluna 'id_disciplina' da relação 'trabalho' viola a restrição de não-nulo".
+*   **Diagnóstico:** O `idDisciplina` não estava sendo passado do `TrabalhoController` para o `TrabalhoService` e, consequentemente, não era definido no objeto `Trabalho` antes da inserção no `PgTrabalhoDAO`.
+*   **Solução:**
+    *   Adicionado `idDisciplina` como `@RequestParam` no método `enviarTrabalho` do `TrabalhoController.java`.
+    *   Adicionado `idDisciplina` ao método `enviar` na interface `TrabalhoService.java` e sua implementação `TrabalhoServiceImpl.java`.
+    *   Definido `trabalho.setIdDisciplina(idDisciplina)` em `TrabalhoServiceImpl.java`.
+    *   Incluído `id_disciplina` na consulta `INSERT` e no mapeamento em `PgTrabalhoDAO.java`.
+
+6. Problema 5: Falha ao Enviar Trabalho (Erro 400 Bad Request - Mensagem de Erro Vazia)
+*   **Sintoma:** Estudante recebia 400 Bad Request ao tentar enviar o trabalho, mas sem mensagem de erro detalhada no console do navegador.
+*   **Diagnóstico:** O `TrabalhoController.java` estava retornando `body(null)` em caso de erro de validação de arquivo, e o `EnviarTrabalhoPage.js` não estava lendo o corpo da resposta para exibir a mensagem de erro.
+*   **Solução:**
+    *   Modificado `TrabalhoController.java` para retornar uma mensagem de erro específica (`"Erro: Apenas arquivos PDF e DOCX são permitidos."`) quando o tipo de arquivo é inválido.
+    *   Modificado `EnviarTrabalhoPage.js` para ler o `errorText` do corpo da resposta em caso de `!response.ok`.

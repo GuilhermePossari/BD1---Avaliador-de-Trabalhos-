@@ -38,13 +38,12 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
     }
 
     @Override
-    public Avaliacao read(int idDisciplina, int codAvaliacao) {
-        String sql = "SELECT * FROM Avaliacao WHERE id_disciplina = ? AND cod_avaliacao = ?";
+    public Avaliacao read(int codAvaliacao) {
+        String sql = "SELECT * FROM Avaliacao WHERE cod_avaliacao = ?";
         Avaliacao avaliacao = null;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idDisciplina);
-            statement.setInt(2, codAvaliacao);
+            statement.setInt(1, codAvaliacao);
 
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
@@ -78,11 +77,10 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
     }
 
     @Override
-    public void delete(int idDisciplina, int codAvaliacao) {
-        String sql = "DELETE FROM Avaliacao WHERE id_disciplina = ? AND cod_avaliacao = ?";
+    public void delete(int codAvaliacao) {
+        String sql = "DELETE FROM Avaliacao WHERE cod_avaliacao = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idDisciplina);
-            statement.setInt(2, codAvaliacao);
+            statement.setInt(1, codAvaliacao);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao deletar avaliação.", e);
@@ -132,5 +130,28 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
             throw new RuntimeException("Erro ao listar avaliações por disciplina.", e);
         }
         return avaliacoes;
+    }
+
+    @Override
+    public Avaliacao readByDisciplinaAndCodigo(int idDisciplina, int codAvaliacao) throws SQLException {
+        String sql = "SELECT * FROM Avaliacao WHERE id_disciplina = ? AND cod_avaliacao = ?";
+        Avaliacao avaliacao = null;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idDisciplina);
+            statement.setInt(2, codAvaliacao);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    avaliacao = new Avaliacao();
+                    avaliacao.setIdDisciplina(rs.getInt("id_disciplina"));
+                    avaliacao.setCodAvaliacao(rs.getInt("cod_avaliacao"));
+                    avaliacao.setCriaAvalCod(rs.getInt("cria_aval_cod"));
+                    avaliacao.setDataPublicacao(rs.getDate("data_publicacao"));
+                    avaliacao.setPrazo(rs.getDate("prazo"));
+                }
+            }
+        }
+        return avaliacao;
     }
 }

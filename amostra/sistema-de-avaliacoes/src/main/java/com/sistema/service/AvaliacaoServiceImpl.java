@@ -83,9 +83,9 @@ public Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto) {
 
 
     @Override
-    public Avaliacao buscarPorId(int idDisciplina, int codAvaliacao) {
+    public Avaliacao buscarPorId(int codAvaliacao) {
         try {
-            return avaliacaoDAO.read(idDisciplina, codAvaliacao);
+            return avaliacaoDAO.read(codAvaliacao);
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Erro ao buscar avaliação: " + e.getMessage(), e);
         }
@@ -97,6 +97,15 @@ public Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto) {
             return avaliacaoDAO.allByDisciplina(idDisciplina);
         } catch (java.sql.SQLException e) {
             throw new RuntimeException("Erro ao listar avaliações por disciplina: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Avaliacao buscarPorDisciplinaECodigo(int idDisciplina, int codAvaliacao) {
+        try {
+            return avaliacaoDAO.readByDisciplinaAndCodigo(idDisciplina, codAvaliacao);
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Erro ao buscar avaliação por disciplina e código: " + e.getMessage(), e);
         }
     }
 }

@@ -149,4 +149,27 @@ public class PgCriterioDAO implements CriterioDAO {
         }
         return criterios;
     }
+
+    @Override
+    public List<Criterio> listarPorDisciplina(int idDisciplina) throws SQLException {
+        String sql = "SELECT * FROM Criterio WHERE id_disciplina = ?";
+        List<Criterio> criterios = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idDisciplina);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Criterio criterio = new Criterio();
+                    criterio.setIdDisciplina(rs.getInt("id_disciplina"));
+                    criterio.setCodAvaliacao(rs.getInt("cod_avaliacao"));
+                    criterio.setIdProfessor(rs.getInt("define_id_prof"));
+                    criterio.setIdCriterio(rs.getInt("id_criterio"));
+                    criterio.setNome(rs.getString("nome"));
+                    criterio.setDescricao(rs.getString("descricao"));
+                    criterio.setPeso(rs.getBigDecimal("peso"));
+                    criterios.add(criterio);
+                }
+            }
+        }
+        return criterios;
+    }
 }

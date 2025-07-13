@@ -3,8 +3,18 @@ package com.sistema.controller;
 import com.sistema.model.Trabalho;
 import com.sistema.service.TrabalhoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import com.sistema.dto.TrabalhoCriterioNotaDTO;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,36 +28,76 @@ public class TrabalhoController {
         this.trabalhoService = trabalhoService;
     }
 
-    @PostMapping
-    public Trabalho enviarTrabalho(@RequestBody Trabalho trabalho) {
-        return trabalhoService.enviar(trabalho);
+    @PostMapping("/upload")
+    public ResponseEntity<?> enviarTrabalho(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("idAvaliacao") int idAvaliacao,
+            @RequestParam("idUsuario") int idUsuario,
+            @RequestParam("idDisciplina") int idDisciplina,
+            @RequestParam("dataEnvio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataEnvio
+    ) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || (!originalFilename.toLowerCase().endsWith(".pdf") && !originalFilename.toLowerCase().endsWith(".docx"))) {
+                return ResponseEntity.badRequest().body("Erro: Apenas arquivos PDF e DOCX são permitidos.");
+            }
+
+            Trabalho trabalho = trabalhoService.enviar(file, idAvaliacao, idUsuario, dataEnvio);
+            return ResponseEntity.ok(trabalho);
+        } catch (Exception e) { // Captura qualquer exceção
+            e.printStackTrace(); // Loga a stack trace no console do servidor
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao enviar trabalho: " + e.getMessage());
+        }
     }
 
-    // Retorna todos os trabalhos de uma avaliação específica
-    @GetMapping("/avaliacao/{idDisciplina}/{codAvaliacao}")
+    @GetMapping("/avaliacao/{idAvaliacao}")
         public List<Trabalho> listarPorAvaliacao(
-            @PathVariable int idDisciplina,
-            @PathVariable int codAvaliacao
+            @PathVariable int idAvaliacao
         ) {
-            return trabalhoService.listarPorAvaliacao(idDisciplina, codAvaliacao);
+            return trabalhoService.listarPorAvaliacao(idAvaliacao);
         }
 
 
-    @PutMapping("/{pertAvalCod}/{idUsuario}/avaliar")
-    public Trabalho avaliarTrabalho(
-        @PathVariable int pertAvalCod,
+    @PutMapping("/{idAvaliacao}/{idUsuario}/avaliar")
+    public ResponseEntity<Trabalho> avaliarTrabalho(
+        @PathVariable int idAvaliacao,
         @PathVariable int idUsuario,
-        @RequestParam String status
+        @RequestParam String status,
+        @RequestParam(required = false) Double nota,
+        @RequestBody(required = false) List<TrabalhoCriterioNotaDTO> notasPorCriterio
     ) {
-        return trabalhoService.avaliar(pertAvalCod, idUsuario, status);
+        try {
+            Trabalho trabalhoAtualizado = trabalhoService.avaliar(idAvaliacao, idUsuario, status, nota, notasPorCriterio);
+            return ResponseEntity.ok(trabalhoAtualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
-    @GetMapping("/{pertAvalCod}/{idUsuario}")
+    @GetMapping("/{idAvaliacao}/{idUsuario}/download")
+    public ResponseEntity<Resource> downloadTrabalho(
+            @PathVariable int idAvaliacao,
+            @PathVariable int idUsuario) {
+        try {
+            Resource resource = trabalhoService.download(idAvaliacao, idUsuario);
+            String contentType = "application/octet-stream";
+            String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                    .body(resource);
+        } catch (RuntimeException | IOException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{idAvaliacao}/{idUsuario}")
     public Trabalho buscarTrabalhoPorId(
-        @PathVariable int pertAvalCod,
+        @PathVariable int idAvaliacao,
         @PathVariable int idUsuario
     ) {
-        return trabalhoService.buscarPorId(pertAvalCod, idUsuario);
+        return trabalhoService.buscarPorId(idAvaliacao, idUsuario);
     }
 
     @GetMapping("/disciplina/{idDisciplina}")
@@ -57,6 +107,6 @@ public class TrabalhoController {
 
     @GetMapping("/estudante/{idUsuario}")
     public List<Trabalho> listarPorEstudante(@PathVariable int idUsuario) {
-        return trabalhoService.listarPorEstudante(idUsuario); // cuidado: esse método precisa ser implementado no DAO
+        return trabalhoService.listarPorEstudante(idUsuario);
     }
 }

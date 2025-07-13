@@ -26,7 +26,6 @@ public class AvaliacaoController {
             Avaliacao criada = avaliacaoService.criarComCriterios(dto);
             return ResponseEntity.ok(criada);
         } catch (Exception e) {
-            // Log do erro (para debug no console do backend)
             e.printStackTrace();
             return ResponseEntity.status(500).body("Erro ao criar avaliação: " + e.getMessage());
         }
@@ -43,11 +42,10 @@ public class AvaliacaoController {
         }
     }
 
-    @GetMapping("/{idDisciplina}/{codAvaliacao}")
-    public ResponseEntity<?> buscarPorId(@PathVariable int idDisciplina,
-                                         @PathVariable int codAvaliacao) {
+    @GetMapping("/{codAvaliacao}")
+    public ResponseEntity<?> buscarPorId(@PathVariable int codAvaliacao) {
         try {
-            Avaliacao avaliacao = avaliacaoService.buscarPorId(idDisciplina, codAvaliacao);
+            Avaliacao avaliacao = avaliacaoService.buscarPorId(codAvaliacao);
             if (avaliacao != null) {
                 return ResponseEntity.ok(avaliacao);
             } else {
@@ -67,6 +65,21 @@ public class AvaliacaoController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Erro ao listar avaliações: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{idDisciplina}/{codAvaliacao}")
+    public ResponseEntity<?> buscarPorDisciplinaECodigo(@PathVariable int idDisciplina, @PathVariable int codAvaliacao) {
+        try {
+            Avaliacao avaliacao = avaliacaoService.buscarPorDisciplinaECodigo(idDisciplina, codAvaliacao);
+            if (avaliacao != null) {
+                return ResponseEntity.ok(avaliacao);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Erro ao buscar avaliação por disciplina e código: " + e.getMessage());
         }
     }
 }

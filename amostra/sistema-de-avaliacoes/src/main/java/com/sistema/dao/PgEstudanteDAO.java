@@ -110,15 +110,37 @@ public class PgEstudanteDAO implements EstudanteDAO {
         return estudantes;
     }
     @Override
-    public void matricular(int idUsuario, int idDisciplina) {
+    public void matricular(int idUsuario, int idDisciplina) throws SQLException {
         String sql = "INSERT INTO Est_part_discp (id_usuario, id_disciplina) VALUES (?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
             stmt.setInt(2, idDisciplina);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao matricular estudante: " + e.getMessage(), e);
+            if (e.getSQLState().startsWith("23")) { // Código de erro para violação de integridade (inclui chave primária)
+                throw new SQLException("Estudante já matriculado nesta disciplina.", e);
+            }
+            throw new SQLException("Erro ao matricular estudante: " + e.getMessage(), e);
         }
     }
 
+    @Override
+    public List<com.sistema.model.Disciplina> listarDisciplinasPorEstudante(int idEstudante) throws SQLException {
+        List<com.sistema.model.Disciplina> disciplinas = new ArrayList<>();
+        String sql = "SELECT d.id_disciplina, d.nome, d.adm_prof_id FROM Disciplina d JOIN Est_part_discp epd ON d.id_disciplina = epd.id_disciplina WHERE epd.id_usuario = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idEstudante);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    com.sistema.model.Disciplina disciplina = new com.sistema.model.Disciplina();
+                    disciplina.setId(rs.getInt("id_disciplina"));
+                    disciplina.setNome(rs.getString("nome"));
+                    disciplina.setIdProfessor(rs.getInt("adm_prof_id"));
+                    disciplinas.add(disciplina);
+                }
+            }
+        }
+        return disciplinas;
+    }
 }

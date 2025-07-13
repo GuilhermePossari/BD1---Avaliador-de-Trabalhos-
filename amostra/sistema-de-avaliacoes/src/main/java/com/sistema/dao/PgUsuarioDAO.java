@@ -20,15 +20,20 @@ public class PgUsuarioDAO implements UsuarioDAO {
 
     @Override
     public void create(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO Usuario (id_usuario, pnome, snome, email, senha) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Usuario (pnome, snome, email, senha) VALUES (?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            statement.setInt(1, usuario.getId());
-            statement.setString(2, usuario.getPnome());
-            statement.setString(3, usuario.getSnome());
-            statement.setString(4, usuario.getEmail());
-            statement.setString(5, usuario.getSenha());
+             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, usuario.getPnome());
+            statement.setString(2, usuario.getSnome());
+            statement.setString(3, usuario.getEmail());
+            statement.setString(4, usuario.getSenha());
             statement.executeUpdate();
+
+            try (ResultSet rs = statement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    usuario.setId(rs.getInt(1)); // Define o ID gerado no objeto Usuario
+                }
+            }
         }
     }
 

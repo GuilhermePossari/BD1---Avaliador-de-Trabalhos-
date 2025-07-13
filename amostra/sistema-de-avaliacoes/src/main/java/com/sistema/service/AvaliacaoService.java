@@ -8,6 +8,7 @@ import java.util.List;
 public interface AvaliacaoService {
     Avaliacao criar(Avaliacao avaliacao);
     Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto);
-    Avaliacao buscarPorId(int idDisciplina, int codAvaliacao);
+    Avaliacao buscarPorId(int codAvaliacao);
     List<Avaliacao> listarPorDisciplina(int idDisciplina);
+    Avaliacao buscarPorDisciplinaECodigo(int idDisciplina, int codAvaliacao);
 }

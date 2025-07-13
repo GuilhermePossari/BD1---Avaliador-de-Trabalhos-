@@ -6,10 +6,11 @@ import java.util.List;
 
 public interface TrabalhoDAO {
     void create(Trabalho trabalho) throws SQLException;
-    Trabalho read(int idUsuario, int codAvaliacao) throws SQLException;
+    Trabalho read(int idAvaliacao, int idUsuario) throws SQLException;
     void update(Trabalho trabalho) throws SQLException;
-    void delete(int idUsuario, int codAvaliacao) throws SQLException;
+    void delete(int idAvaliacao, int idUsuario) throws SQLException;
     List<Trabalho> allByDisciplina(int idDisciplina) throws SQLException;
     List<Trabalho> all() throws SQLException;
-    List<Trabalho> listarPorAvaliacao(int idDisciplina, int codAvaliacao);
+    List<Trabalho> listarPorAvaliacao(int idAvaliacao);
+    List<Trabalho> allByEstudante(int idUsuario) throws SQLException;
 }

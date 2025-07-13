@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sistema.model.Disciplina;
+
 import java.util.List;
 
 @Service
@@ -20,7 +22,11 @@ public class EstudanteServiceImpl implements EstudanteService {
 
     @Override
     public void matricular(int idUsuario, int idDisciplina) {
-        estudanteDAO.matricular(idUsuario, idDisciplina);
+        try {
+            estudanteDAO.matricular(idUsuario, idDisciplina);
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Erro ao matricular estudante: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -59,6 +65,15 @@ public class EstudanteServiceImpl implements EstudanteService {
             estudanteDAO.delete(id);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao deletar estudante: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<Disciplina> listarDisciplinasPorEstudante(int idEstudante) {
+        try {
+            return estudanteDAO.listarDisciplinasPorEstudante(idEstudante);
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Erro ao listar disciplinas do estudante: " + e.getMessage(), e);
         }
     }
 }

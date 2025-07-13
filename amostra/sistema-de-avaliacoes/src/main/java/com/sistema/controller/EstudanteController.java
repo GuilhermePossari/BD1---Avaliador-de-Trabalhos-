@@ -53,8 +53,25 @@ public class EstudanteController {
         try {
             estudanteService.matricular(idUsuario, idDisciplina);
             return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            // Captura a exceção lançada pelo DAO para violação de chave primária
+            if (e.getMessage().contains("Estudante já matriculado nesta disciplina.")) {
+                return ResponseEntity.status(409).body(e.getMessage()); // 409 Conflict
+            } else {
+                return ResponseEntity.badRequest().body("Erro ao matricular: " + e.getMessage());
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro ao matricular: " + e.getMessage());
+            return ResponseEntity.status(500).body("Erro interno ao matricular: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{idEstudante}/disciplinas")
+    public ResponseEntity<List<com.sistema.model.Disciplina>> listarDisciplinasPorEstudante(@PathVariable int idEstudante) {
+        try {
+            List<com.sistema.model.Disciplina> disciplinas = estudanteService.listarDisciplinasPorEstudante(idEstudante);
+            return ResponseEntity.ok(disciplinas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null); // Ou um tratamento de erro mais específico
         }
     }
 }

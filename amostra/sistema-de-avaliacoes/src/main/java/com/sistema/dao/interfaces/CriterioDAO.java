@@ -11,4 +11,5 @@ public interface CriterioDAO {
     void delete(int idDisciplina, int codAvaliacao, int idProfessor, int idCriterio) throws SQLException;
     List<Criterio> allByAvaliacao(int idDisciplina, int codAvaliacao) throws SQLException;
     public List<Criterio> all() throws SQLException;
+    List<Criterio> listarPorDisciplina(int idDisciplina) throws SQLException;
 }
