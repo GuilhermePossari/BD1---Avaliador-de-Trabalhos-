@@ -172,4 +172,20 @@ public class PgCriterioDAO implements CriterioDAO {
         }
         return criterios;
     }
+
+    @Override
+    public Integer findMaxIdCriterio(int idDisciplina, int codAvaliacao, int idProfessor) throws SQLException {
+        String sql = "SELECT MAX(id_criterio) FROM Criterio WHERE id_disciplina = ? AND cod_avaliacao = ? AND define_id_prof = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idDisciplina);
+            statement.setInt(2, codAvaliacao);
+            statement.setInt(3, idProfessor);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return (Integer) rs.getObject(1);
+                }
+            }
+        }
+        return null;
+    }
 }

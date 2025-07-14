@@ -12,4 +12,5 @@ public interface CriterioDAO {
     List<Criterio> allByAvaliacao(int idDisciplina, int codAvaliacao) throws SQLException;
     public List<Criterio> all() throws SQLException;
     List<Criterio> listarPorDisciplina(int idDisciplina) throws SQLException;
+    Integer findMaxIdCriterio(int idDisciplina, int codAvaliacao, int idProfessor) throws SQLException;
 }

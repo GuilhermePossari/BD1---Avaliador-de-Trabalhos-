@@ -154,4 +154,18 @@ public class PgAvaliacaoDAO implements AvaliacaoDAO {
         }
         return avaliacao;
     }
+
+    @Override
+    public Integer findMaxCodAvaliacao(int idDisciplina) throws SQLException {
+        String sql = "SELECT MAX(cod_avaliacao) FROM Avaliacao WHERE id_disciplina = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idDisciplina);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return (Integer) rs.getObject(1);
+                }
+            }
+        }
+        return null;
+    }
 }

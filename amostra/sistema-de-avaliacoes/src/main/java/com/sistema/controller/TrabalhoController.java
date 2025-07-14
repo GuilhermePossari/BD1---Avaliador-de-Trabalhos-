@@ -42,7 +42,7 @@ public class TrabalhoController {
                 return ResponseEntity.badRequest().body("Erro: Apenas arquivos PDF e DOCX são permitidos.");
             }
 
-            Trabalho trabalho = trabalhoService.enviar(file, idAvaliacao, idUsuario, dataEnvio);
+            Trabalho trabalho = trabalhoService.enviar(file, idAvaliacao, idUsuario, idDisciplina, dataEnvio);
             return ResponseEntity.ok(trabalho);
         } catch (Exception e) { // Captura qualquer exceção
             e.printStackTrace(); // Loga a stack trace no console do servidor
@@ -93,11 +93,16 @@ public class TrabalhoController {
     }
 
     @GetMapping("/{idAvaliacao}/{idUsuario}")
-    public Trabalho buscarTrabalhoPorId(
+    public ResponseEntity<?> buscarTrabalhoPorId(
         @PathVariable int idAvaliacao,
         @PathVariable int idUsuario
     ) {
-        return trabalhoService.buscarPorId(idAvaliacao, idUsuario);
+        Trabalho trabalho = trabalhoService.buscarPorId(idAvaliacao, idUsuario);
+        if (trabalho != null) {
+            return ResponseEntity.ok(trabalho);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/disciplina/{idDisciplina}")

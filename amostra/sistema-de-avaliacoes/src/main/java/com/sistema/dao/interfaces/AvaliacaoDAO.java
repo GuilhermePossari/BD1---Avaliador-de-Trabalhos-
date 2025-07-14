@@ -12,4 +12,5 @@ public interface AvaliacaoDAO {
     List<Avaliacao> all() throws SQLException;
     List<Avaliacao> allByDisciplina(int idDisciplina) throws SQLException;
     Avaliacao readByDisciplinaAndCodigo(int idDisciplina, int codAvaliacao) throws SQLException;
+    Integer findMaxCodAvaliacao(int idDisciplina) throws SQLException;
 }

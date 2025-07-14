@@ -48,7 +48,9 @@ public Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto) {
 
     Avaliacao avaliacao = new Avaliacao();
     avaliacao.setIdDisciplina(dto.getIdDisciplina());
-    avaliacao.setCodAvaliacao(dto.getCodAvaliacao());
+    Integer maxCodAvaliacao = avaliacaoDAO.findMaxCodAvaliacao(dto.getIdDisciplina());
+    int nextCodAvaliacao = (maxCodAvaliacao != null) ? maxCodAvaliacao + 1 : 1; // Start from 1 if no existing evaluations for this discipline
+    avaliacao.setCodAvaliacao(nextCodAvaliacao);
     avaliacao.setCriaAvalCod(dto.getCriaAvalCod());
     avaliacao.setDataPublicacao(dto.getDataPublicacao());
     avaliacao.setPrazo(dto.getPrazo());
@@ -59,13 +61,14 @@ public Avaliacao criarComCriterios(AvaliacaoComCriteriosDTO dto) {
         List<CriterioDTO> criteriosDto = dto.getCriterios();
 
         if (criteriosDto != null) {
-            int idCriterio = 0; // Começa do zero e incrementa para cada critério
+            Integer maxIdCriterio = criterioDAO.findMaxIdCriterio(dto.getIdDisciplina(), dto.getCodAvaliacao(), dto.getCriaAvalCod());
+            int nextIdCriterio = (maxIdCriterio != null) ? maxIdCriterio + 1 : 0;
             for (CriterioDTO cDto : criteriosDto) {
                 Criterio c = new Criterio();
                 c.setIdDisciplina(dto.getIdDisciplina());
                 c.setCodAvaliacao(dto.getCodAvaliacao());
                 c.setIdProfessor(dto.getCriaAvalCod()); // O professor criador
-                c.setIdCriterio(idCriterio++); // Cada critério recebe um id único dentro da avaliação
+                c.setIdCriterio(nextIdCriterio++); // Cada critério recebe um id único dentro da avaliação
                 c.setNome(cDto.getNome());
                 c.setDescricao(cDto.getDescricao());
                 c.setPeso(java.math.BigDecimal.valueOf(cDto.getPeso()));

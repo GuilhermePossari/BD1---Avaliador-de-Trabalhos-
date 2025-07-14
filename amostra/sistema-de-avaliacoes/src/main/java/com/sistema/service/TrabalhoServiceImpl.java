@@ -50,7 +50,7 @@ public class TrabalhoServiceImpl implements TrabalhoService {
 
     @Override
     @Transactional
-    public Trabalho enviar(org.springframework.web.multipart.MultipartFile file, int idAvaliacao, int idUsuario, java.time.LocalDate dataEnvio) throws java.io.IOException {
+    public Trabalho enviar(org.springframework.web.multipart.MultipartFile file, int idAvaliacao, int idUsuario, int idDisciplina, java.time.LocalDate dataEnvio) throws java.io.IOException {
         String uploadDir = System.getProperty("user.dir") + java.io.File.separator + "uploads" + java.io.File.separator;
         java.io.File dir = new java.io.File(uploadDir);
         if (!dir.exists()) {

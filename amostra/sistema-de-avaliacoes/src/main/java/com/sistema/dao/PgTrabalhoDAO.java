@@ -33,8 +33,8 @@ public class PgTrabalhoDAO implements TrabalhoDAO {
 
     @Override
     public void create(Trabalho trabalho) {
-        String sql = "INSERT INTO Trabalho (pert_aval_cod, id_usuario, data_envio, arquivo_url, status) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Trabalho (pert_aval_cod, id_usuario, id_disciplina, data_envio, arquivo_url, status) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, trabalho.getIdAvaliacao());
             statement.setInt(2, trabalho.getIdUsuario());
@@ -67,7 +67,7 @@ public class PgTrabalhoDAO implements TrabalhoDAO {
 
     @Override
     public Trabalho read(int idAvaliacao, int idUsuario) {
-        String sql = "SELECT * FROM Trabalho WHERE id_avaliacao = ? AND id_usuario = ?";
+        String sql = "SELECT * FROM Trabalho WHERE pert_aval_cod = ? AND id_usuario = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idAvaliacao);
             statement.setInt(2, idUsuario);
@@ -163,6 +163,7 @@ public class PgTrabalhoDAO implements TrabalhoDAO {
         Trabalho trabalho = new Trabalho();
         trabalho.setIdAvaliacao(rs.getInt("pert_aval_cod"));
         trabalho.setIdUsuario(rs.getInt("id_usuario"));
+        trabalho.setIdDisciplina(rs.getInt("id_disciplina"));
         trabalho.setDataEnvio(rs.getDate("data_envio").toLocalDate());
         trabalho.setArquivoUrl(rs.getString("arquivo_url"));
         trabalho.setStatus(rs.getString("status"));

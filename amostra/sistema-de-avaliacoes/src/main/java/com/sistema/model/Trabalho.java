@@ -8,6 +8,7 @@ import java.util.List;
 public class Trabalho {
     private int idUsuario;
     private int idAvaliacao;
+    private int idDisciplina;
     private LocalDate dataEnvio;
     private String arquivoUrl;
     private String status;
@@ -16,14 +17,23 @@ public class Trabalho {
 
     public Trabalho() {}
 
-    public Trabalho(int idUsuario, int idAvaliacao, LocalDate dataEnvio, String arquivoUrl, String status, Double nota, List<TrabalhoCriterioNotaDTO> notasPorCriterio) {
+    public Trabalho(int idUsuario, int idAvaliacao, int idDisciplina, LocalDate dataEnvio, String arquivoUrl, String status, Double nota, List<TrabalhoCriterioNotaDTO> notasPorCriterio) {
         this.idUsuario = idUsuario;
         this.idAvaliacao = idAvaliacao;
+        this.idDisciplina = idDisciplina;
         this.dataEnvio = dataEnvio;
         this.arquivoUrl = arquivoUrl;
         this.status = status;
         this.nota = nota;
         this.notasPorCriterio = notasPorCriterio;
+    }
+
+    public int getIdDisciplina() {
+        return idDisciplina;
+    }
+
+    public void setIdDisciplina(int idDisciplina) {
+        this.idDisciplina = idDisciplina;
     }
 
     public int getIdUsuario() {
